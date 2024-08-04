@@ -1,0 +1,158 @@
+---
+title: "HW6"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+powerCell_data <- read.table("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/PowerCellData.txt", sep = "", header = F)
+names(powerCell_data) <- c("cycles","rate","temp")
+attach(powerCell_data)
+cor(cbind(rate, temp, rate^2, temp^2, rate*temp))
+```
+
+```{r}
+mod1<-lm(cycles~rate+temp+I(rate^2)+I(temp^2)+ I(rate*temp))
+summary(mod1)
+
+rate.code <- (rate-mean(rate))/0.4
+temp.code <- (temp-mean(temp))/10
+cor(cbind(rate.code,temp.code,rate.code^2,temp.code^2))
+
+mod2<-lm(cycles~rate.code+temp.code+I(rate.code^2)+I(temp.code^2)+I(rate.code*temp.code))
+summary(mod2)
+
+mod.full <- lm(cycles~0+factor(rate.code)+factor(temp.code)+factor(rate.code)*factor(temp.code))
+anova(mod2, mod.full)
+
+mod.linear <- lm(cycles~rate.code+temp.code)
+anova(mod.linear,mod2)
+
+cf <- coefficients(mod.linear)
+cf.rate <- cf["rate.code"]/0.4
+cf.rate
+cf.temp <- cf["temp.code"]/10
+cf.temp
+const <- cf[1] - cf[2]/0.4 - cf[3]*20/10
+const
+
+ci <- confint(mod.linear, level = 0.95)
+ci["rate.code",] / 0.4
+ci["temp.code",] / 10
+```
+
+```{r}
+mortgageYield_data <- read.table("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/mortgageYield.txt", sep = "", header = T)
+names(mortgageYield_data) <- c("cityId","mortgage_yield","mortgage_ratio","distance","savings_per_built", "savings_per_capita", "population_increase", "percent_banks")
+attach(mortgageYield_data)
+
+#2a-i
+mortgage_yield_model1<-lm(mortgage_yield~mortgage_ratio+distance+savings_per_built+savings_per_capita+population_increase+percent_banks, mortgageYield_data)
+summary(mortgage_yield_model1)
+```
+
+```{r}
+#2a-ii
+m1<-lm(mortgage_yield~distance+savings_per_built+savings_per_capita+population_increase+percent_banks)
+anova(m1,mortgage_yield_model1)
+
+m2<-lm(mortgage_yield~mortgage_ratio+savings_per_built+savings_per_capita+population_increase+percent_banks)
+anova(m2,mortgage_yield_model1)
+
+m3<-lm(mortgage_yield~mortgage_ratio+distance+savings_per_capita+population_increase+percent_banks)
+anova(m3,mortgage_yield_model1)
+
+m4<-lm(mortgage_yield~mortgage_ratio+distance+savings_per_built+population_increase+percent_banks)
+anova(m4,mortgage_yield_model1)
+
+m5<-lm(mortgage_yield~mortgage_ratio+distance+savings_per_built+savings_per_capita+percent_banks)
+anova(m5,mortgage_yield_model1)
+
+m6<-lm(mortgage_yield~mortgage_ratio+distance+savings_per_built+savings_per_capita+population_increase)
+anova(m6,mortgage_yield_model1)
+```
+
+```{r}
+#2a-iii
+library(car)
+Anova(mortgage_yield_model1, type = "III")
+```
+
+```{r}
+#2-b
+dist_pop_percent<-lm(mortgage_yield~mortgage_ratio+savings_per_built+savings_per_capita)
+anova(dist_pop_percent, mortgage_yield_model1)
+```
+
+```{r}
+#2-c first order model
+library(leaps)
+reg_subsets<-regsubsets(mortgage_yield~mortgage_ratio+distance+savings_per_built+savings_per_capita+population_increase+percent_banks, mortgageYield_data)
+reg_summary<-summary(reg_subsets)
+reg_summary
+
+cp_min<-which.min(reg_summary$cp)
+cp_min
+bic_min<-which.min(reg_summary$bic)
+bic_min
+adjr2_max<-which.max(reg_summary$adjr2)
+adjr2_max
+
+par(mfrow = c(2,2))
+plot(reg_summary$adjr2, xlab = "Number of Variables", ylab = "Adjusted RSq", type = "l", sub = "Sachi Vyas")
+points(adjr2_max, reg_summary$adjr2[adjr2_max],col="green",cex = 2, pch = 20)
+
+plot(reg_summary$cp, xlab = "Number of Variables", ylab = "Cp", type = "l", sub = "Sachi Vyas")
+points(cp_min, reg_summary$cp[cp_min],col="green",cex = 2, pch = 20)
+
+plot(reg_summary$bic, xlab = "Number of Variables", ylab = "Cp", type = "l", sub = "Sachi Vyas")
+points(bic_min, reg_summary$bic[bic_min],col="red",cex = 2, pch = 20)
+
+library("MPV")
+press_1<-sum((resid(mortgage_yield_model1)/(1-hatvalues(mortgage_yield_model1)))^2)
+press_1
+```
+
+```{r}
+#2nd order model
+reg_subsets1<-regsubsets(mortgage_yield ~ mortgage_ratio + distance + savings_per_built +
+savings_per_capita + population_increase + percent_banks + I(mortgage_ratio^2) + I(distance^2) +
+I(savings_per_built^2) + I(savings_per_capita^2) + I(population_increase^2) +
+I(percent_banks^2) + mortgage_ratio * distance + mortgage_ratio * savings_per_built +
+mortgage_ratio * savings_per_capita + mortgage_ratio * population_increase +
+mortgage_ratio * percent_banks + distance * savings_per_built + distance * savings_per_capita +
+distance * population_increase + distance * percent_banks + savings_per_built * savings_per_capita +
+savings_per_built * population_increase + savings_per_built * percent_banks +
+savings_per_capita * population_increase + savings_per_capita * percent_banks +
+population_increase * percent_banks, mortgageYield_data)
+
+reg_summary2<-summary(reg_subsets1)
+reg_summary2
+cp_min<-which.min(reg_summary2$cp)
+cp_min
+bic_min<-which.min(reg_summary2$bic)
+bic_min
+which.max(reg_summary2$adjr2)
+
+par(mfrow = c(2,2))
+plot(reg_summary2$adjr2, xlab = "Number of Variables", ylab = "Adjusted RSq", type = "l", sub = "Sachi Vyas")
+points(adjr2_max, reg_summary2$adjr2[adjr2_max],col="green",cex = 2, pch = 20)
+
+plot(reg_summary2$cp, xlab = "Number of Variables", ylab = "Cp", ylim=c(0,8) ,type = "l", sub = "Sachi Vyas")
+points(cp_min, reg_summary2$cp[cp_min],col="green",cex = 2, pch = 20)
+
+plot(reg_summary2$bic, xlab = "Number of Variables", ylab = "bic", type = "l", sub = "Sachi Vyas")
+points(bic_min, reg_summary2$bic[bic_min],col="red",cex = 2, pch = 20)
+
+#for press statistic
+reg_subsets_model<-lm(mortgage_yield ~ mortgage_ratio + distance + savings_per_built +
+savings_per_capita + population_increase + percent_banks + I(mortgage_ratio^2) + I(distance^2) +
+I(savings_per_built^2) + I(savings_per_capita^2) + I(population_increase^2) +
+I(percent_banks^2), mortgageYield_data)
+press_2<-sum((resid(reg_subsets_model)/(1-hatvalues(reg_subsets_model)))^2)
+press_2
+```

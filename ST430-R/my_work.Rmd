@@ -1,0 +1,56 @@
+---
+title: "Rough Work"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#transformation lab 1
+alligat_weight<-c(130, 51, 640, 28, 80, 110, 33, 90, 36, 38, 366, 84, 80, 83, 70, 61, 54, 44, 106, 84, 39, 42, 197, 102, 57)
+alligat_length<-c(94, 74, 147, 58, 86, 94, 63, 86, 69, 72, 128, 85, 82, 86, 88, 72, 74, 61, 90, 89, 68, 76, 114, 90, 78)
+alligator_model<-lm(alligat_weight~alligat_length)
+plot(alligator_model$residuals)
+abline(h=0,col="red")
+
+alligator_model2<-lm(alligat_weight~log(alligat_length))
+plot(alligator_model2$fitted.values, alligator_model2$residuals)
+
+alligator_model3<-lm(log(alligat_weight)~alligat_length)
+plot(alligator_model3$fitted.values, alligator_model3$residuals)
+
+alligator_model4<-lm(log(alligat_weight)~log(alligat_length))
+plot(alligator_model3$fitted.values, alligator_model3$residuals)
+```
+
+```{r}
+#Transformation lab 2
+Co_gdp <- read.delim("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/CO2.txt", sep = "", header=TRUE)
+#1
+model_gdp <- lm(co2 ~ gdp, Co_gdp)
+plot(Co_gdp$co2, Co_gdp$gdp)
+
+#2
+plot(model_gdp)
+#Transformation is needed because we do not see a linear pattern plot when we plot the regression model and the points are all clustered in one corner of the graph.
+
+#3
+library(MASS)
+boxcox(model_gdp, lambda = seq(0, 1, 0.1))
+#Since the lambda value is close to 0.25, we can do a fourth-root transformation or a natural log transformation.
+res=model_gdp$residuals
+fit=model_gdp$fitted
+plot(res~fit, xlab='Fitted', ylab='Residuals', main= "Residuals vs. Fitted Plot", pch=118, cex=1.3) 
+abline(h=0, col="blue")
+
+full=lm(Co_gdp$co2~0+as.factor(Co_gdp$gdp))
+anova(model_gdp, full)
+```
+
+```{r}
+2*(1-pt(10.2917,23))
+```

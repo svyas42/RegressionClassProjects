@@ -1,0 +1,106 @@
+---
+title: "HW7"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+used_cars <- read.table("/Users/sachivyas/Desktop/Class Notes/430 notes/datasets/Used Cars Data.txt", sep = ",", header = TRUE)
+attach(used_cars)
+```
+
+```{r}
+#a
+used_cars_model<-lm(Asking.Price~Mileage+Price.New+Avg.Retail)
+confint(used_cars_model)
+```
+
+```{r}
+#b
+plot(used_cars_model$fitted.values, used_cars_model$residuals, sub="Sachi Vyas")
+abline(h=0)
+qqnorm(used_cars_model$residuals, sub = "Sachi Vyas")
+qqline(used_cars_model$residuals)
+```
+
+```{r}
+#c
+bptest(used_cars_model, studentize=FALSE)
+```
+
+```{r}
+#d
+plot(used_cars_model$residuals, main="Residual time sequence plot", sub="Sachi Vyas")
+abline(h=0, col="red")
+```
+
+```{r}
+#e
+library(lmtest)
+dwtest(used_cars_model)
+```
+
+```{r}
+#f
+hist(used_cars_model$residuals, sub = "Sachi Vyas")
+```
+
+```{r}
+#g
+shapiro.test(used_cars_model$residuals)
+```
+
+```{r}
+#h
+cooks.distance(used_cars_model)
+n <- length(Asking.Price)
+p <- 4
+crit <- 2*p/n
+hv <- hatvalues(used_cars_model)
+hv
+plot(hv,type="b", ylim=c(0,0.4))
+abline(h=crit)
+#identify(hv,labels=row.names(used_cars))
+(1:length(hv))[hv>crit]
+```
+
+```{r}
+#i
+plot(used_cars_model$fitted.values,rstandard(used_cars_model),main=" Outliers in Y\nDiagnostic",sub = "Sachi Vyas",xlab="Fitted values",ylab="Residual",pch=23,bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+abline(h=2,col="blue")
+abline(h=-2,col="blue")
+identify(used_cars_model$fitted.values,rstandard(used_cars_model), labels=row.names(used_cars))
+(1:length(rstandard(used_cars_model)))[rstandard(used_cars_model)>2]
+(1:length(rstandard(used_cars_model)))[rstandard(used_cars_model)< -2]
+```
+
+```{r}
+#j
+used_cars1.cook <- cooks.distance(used_cars_model)
+plot(cooks.distance(used_cars_model), sub = "Sachi Vyas")
+cutoff <- with(used_cars_model, 3/df.residual)
+abline(h=cutoff, lty=2)
+names(used_cars1.cook[which(used_cars1.cook > cutoff)])
+identify(used_cars1.cook, labels=row.names(used_cars))
+#influential_points <- which(used_cars1.cook > cutoff)
+#influential_points
+```
+
+```{r}
+#k
+library(car)
+vif(used_cars_model)
+mean(vif(used_cars_model))
+```
+
+```{r}
+summary(used_cars_model)
+influenceIndexPlot(used_cars_model)
+```
+

@@ -1,0 +1,68 @@
+---
+title: "HW5"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#reading in the data
+sales_data <- read.table("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/Software Sales Data.txt", sep = "", header = T)
+pigweight<-read.table("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/Pigweight Data.txt", sep = "", header = T)
+```
+```{r}
+#1A
+attach(sales_data)
+sales_model<-lm(SalesThisQuarter~factor(Software), sales_data)
+summary(sales_model)
+```
+```{r}
+#1B
+sales_model2<-lm(SalesThisQuarter~factor(Software)+SalesLastQuarter, sales_data)
+sales<-lm(SalesThisQuarter~SalesLastQuarter, sales_data)
+anova(sales_model2)
+anova(sales)
+anova(sales,sales_model2)
+```
+```{r}
+#1C
+sales_model3<-lm(SalesThisQuarter~factor(Software)*SalesLastQuarter, sales_data)
+anova(sales_model3)
+```
+```{r}
+#1C-(vi)
+sw2<-ifelse(Software==2,1,0)
+sales_model4<-lm(SalesThisQuarter~sw2+SalesLastQuarter, sales_data)
+summary(sales_model4)
+anova(sales_model4, sales_model2)
+```
+```{r}
+#1D
+#sw1<-ifelse(Software==1,1,0)
+sales_model5<-lm(SalesThisQuarter~sw2*SalesLastQuarter, sales_data)
+
+anova(sales_model5, sales_model3)
+```
+```{r}
+#2-a
+pig_full_model<-lm(Pigweight~factor(Drug)+Momweight+Dadweight, pigweight)
+summary(pig_full_model)
+```
+```{r}
+#2-b
+drug2<-ifelse(pigweight$Drug==2,1,0)
+drug3<-ifelse(pigweight$Drug==3,1,0)
+res <- coef(summary(pig_full_model))
+table_drugs<-data.frame(Drug=c("Drug1","Drug2","Drug3"), E_y_x=c(res[4],res[5],res[6]))
+table_drugs
+```
+```{r}
+#2e
+comparison_12<-lm(Pigweight~factor(Drug)+Momweight+Dadweight, pigweight)
+coef(summary(comparison_12))
+#vcov(comparison_12)
+```

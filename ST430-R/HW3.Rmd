@@ -1,0 +1,152 @@
+---
+title: "HW3"
+author: "Sachi Vyas"
+date: '`r Sys.Date()`'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#1-a
+CH01PR28 <- read.delim("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/CH01PR28.txt", sep = "", header=FALSE, col.names = c("CrimeRate", "PercentageWithDiploma"))
+model <- lm(CrimeRate ~ PercentageWithDiploma, CH01PR28)
+summary(model)
+
+#1-b
+anova(model)
+
+#1-f
+cor(CH01PR28$PercentageWithDiploma, CH01PR28$CrimeRate)
+
+#1-h
+plot(CH01PR28$PercentageWithDiploma, CH01PR28$CrimeRate, xlab = "Percent of High School Graduates", ylab = "Crime Rate", main = "Crime Rates vs. High School Graduation Rates", sub = "Sachi Vyas", pch = 16, col = "blue")
+abline(model, col = "red")
+
+#1-i
+plot(model$fitted.values,model$residuals,main="Crime rate Data", sub = "Sachi Vyas", xlab="Fitted values",ylab="Residual", bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+abline(h=2,col="blue")
+abline(h=-2,col="blue")
+library(car)
+ncvTest(model)  #test for heteroskedasticity
+
+#1-j
+library(lmtest)
+bptest(model, studentize = FALSE)
+
+#1-k
+plot(model$residuals, ylab="Residuals",main="Residual time sequence Plot", sub="Sachi Vyas")
+abline(h=0,col="red")
+
+#1-l
+library(car)
+durbinWatsonTest(model)
+
+#1-m
+plot(model$fitted,rstandard(model),main="CrimeRate Data\n Diagnostic",sub="Sachi Vyas",xlab="Fitted values",ylab="Residual", pch=23,bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+abline(h=2,col="blue")
+abline(h=-2,col="blue")
+
+#1-n
+hist(model$residuals, main="Histogram of Residuals", sub = "Sachi Vyas", xlab="Residuals", freq=FALSE)
+lines(density(model$residuals), col = "red", lwd = 2 )
+
+#1-o
+library(car)
+qqPlot(model, main="QQplot-Q1(o)", sub="Sachi Vyas", id.n=5)
+
+#1-p
+shapiro.test(model$residuals)
+```
+
+```{r}
+#2-a
+explosives <- read.delim("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/Explosives.txt", sep = "", header=FALSE, col.names = c("area_of_wires", "deflection_galvanometer"))
+plot(explosives$area_of_wires, explosives$deflection_galvanometer, main = "Area of wires vs Deflection of galvanometer", sub = "Sachi Vyas", xlab = "area of wires", ylab = "deflection")
+
+#2-b
+explosives_model <- lm(deflection_galvanometer ~ area_of_wires, explosives)
+summary(explosives_model)
+
+#2c
+plot(explosives_model$fitted.values, explosives_model$residuals, main = "Residual plot(2c)", sub = "Sachi Vyas")
+abline(h=0,col="red")
+library(car)
+ncvTest(explosives_model)
+
+#2d
+library(lmtest)
+bptest(explosives_model, studentize = FALSE)
+
+#2e
+plot(explosives_model$residuals, ylab="Residuals",main="Residual time sequence Plot", sub="Sachi Vyas")
+abline(h=0,col="red")
+
+#2f
+library(car)
+durbinWatsonTest(explosives_model)
+
+#2-g
+plot(explosives_model$fitted.values,rstandard(explosives_model),main="Outlier deduction test",sub="Sachi Vyas",xlab="Fitted values",ylab="Residual", pch=23,bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+abline(h=1,col="blue")
+abline(h=-1,col="blue")
+
+#2-h
+hist(explosives_model$residuals, main="Histogram of Residuals", sub = "Sachi Vyas", xlab="Residuals")
+
+#2-i
+library(car)
+qqPlot(explosives_model, main="QQplot-Q2(i)", sub="Sachi Vyas", id.n=5)
+
+#2j
+shapiro.test(explosives_model$residuals)
+
+#2-k
+anova(explosives_model)
+```
+
+```{r}
+#3-a
+surg_model<-lm(sur_time~clot, surg.data)
+anova(surg_model)
+
+#3-b
+plot(surg.data$clot, surg.data$sur_time, main = "Clot vs Survival time", sub = "Sachi Vyas", xlab = "Clot", ylab = "Survival time")
+abline(surg_model, col = "blue")
+
+#3-c
+plot(surg_model$fitted.values,surg_model$residuals,main="Residual plot(3c)",sub="Sachi Vyas",xlab="Fitted values",ylab="Residual", pch=23,bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+ncvTest(surg_model)
+
+#3-d
+bptest(surg_model)
+
+#3-e
+plot(surg_model$residuals, ylab="Residuals",main="Residual time sequence Plot", sub="Sachi Vyas")
+abline(h=0,col="red")
+
+#3-f
+dwtest(surg_model)
+
+#3-g
+plot(surg_model$fitted.values,rstandard(surg_model),main="Outlier deduction test",sub="Sachi Vyas",xlab="Fitted values",ylab="Residual", pch=23,bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+abline(h=2,col="blue")
+abline(h=-2,col="blue")
+
+#3-h
+hist(surg_model$residuals, main="Histogram of Residuals", sub = "Sachi Vyas", xlab="Residuals", freq=FALSE)
+lines(density(surg_model$residuals), col = "red", lwd = 2 )
+
+#3-i
+qqPlot(surg_model, main="QQplot-Q3(i)", sub="Sachi Vyas", id.n=5)
+
+#3-j
+shapiro.test(surg_model$residuals)
+```

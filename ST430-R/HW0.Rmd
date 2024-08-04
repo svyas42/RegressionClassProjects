@@ -1,0 +1,25 @@
+---
+title: "HW0"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+summary(sat)
+cor(sat$salary, sat$expend, use = "complete.obs")
+summary(press)
+cor(press$catalyst, press$time, use = "complete.obs")
+```
+
+```{r pressure, echo=TRUE}
+hist(sat$salary, col = "pink", sub = "Sachi Vyas", main = "Salary Range", xlab = "Salary")
+plot(sat$salary, sat$expend, col = "blue", sub = "Sachi Vyas", main = "Scatterplot Salary vs Expenditure", xlab = "Salary", ylab = "Expenditure")
+
+plot(press$catalyst, press$time, sub = "Sachi Vyas", main = "Scatterplot Time vs Catalyst", xlab = "Catalyst", ylab = "Time")
+```
+

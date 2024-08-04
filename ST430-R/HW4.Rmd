@@ -1,0 +1,147 @@
+---
+title: "HW4"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Problem 1A
+CH06PR18 <- read.delim("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/CH06PR18.txt", sep = "", header=FALSE, col.names = c("rental_rates", "age", "expenses", "vacancy_rates", "square_footage"))
+
+#1
+pairs(CH06PR18, col = "red")
+title(sub = "Sachi Vyas", cex.sub=0.8)
+
+#2
+cor(CH06PR18)
+
+#3a
+property_model <- lm(rental_rates ~ age + expenses + vacancy_rates + square_footage, CH06PR18)
+summary(property_model)
+anova(property_model)
+
+#3e
+model1 <- lm(rental_rates ~ age + expenses, CH06PR18)
+summary(model1)
+model2 <- lm(rental_rates ~ age + expenses + vacancy_rates + square_footage, CH06PR18)
+anova(model1, model2)
+
+#3f
+model1 <- lm(rental_rates ~ age + expenses + square_footage, CH06PR18)
+summary(model1)
+anova(model1,model2)
+
+#3g
+reduced_property_model <- lm(rental_rates ~ age + expenses + square_footage, CH06PR18)
+summary(reduced_property_model)
+
+#4-I
+confint(reduced_property_model, level = 0.9)
+
+#4-II
+confint(reduced_property_model, level = (1-(0.1/4)))
+
+#4-III
+age <- c(5.0, 6.0, 14.0, 12.0)
+expenses <- c(8.25, 8.50, 11.50, 10.25)
+square_footage <- c(250000, 270000, 300000, 310000)
+est_rental_rates <- data.frame(age, expenses, square_footage)
+predict(reduced_property_model, est_rental_rates, interval="confidence", level=(1-.05))
+
+#4-IV
+age <- c(4.0, 6.0, 12.0)
+expenses <- c(10.0, 11.5, 12.5)
+square_footage <- c(80000, 120000, 340000)
+est_rental_rates <- data.frame(age, expenses, square_footage)
+predict(reduced_property_model, est_rental_rates, interval="prediction", level=(1-.05))
+
+#5-a
+par(mfrow=c(1,1))
+plot(fitted(reduced_property_model), resid(reduced_property_model), main = "Plot for 5a", sub = "Sachi Vyas")
+abline(h=0)
+
+#5-b
+qqnorm(resid(reduced_property_model), main = "Q-Q plot for 5b", sub = "Sachi Vyas")
+qqline(resid(reduced_property_model))
+boxplot(resid(reduced_property_model), main = "Boxplot for 5b",sub = "Sachi Vyas", ylab = "residuals")
+hist(resid(reduced_property_model), main = "Histogram for 5b", sub = "Sachi Vyas", freq=FALSE)
+lines(density(reduced_property_model$residuals), col = "red", lwd = 2)
+
+#5-c
+library(lmtest)
+bptest(reduced_property_model, studentize=FALSE)
+
+#5-d
+plot(reduced_property_model$residuals, ylab="Residuals",main="Index plot for 5b", sub="Sachi Vyas")
+abline(h=0,col="red")
+library(lmtest)
+dwtest(reduced_property_model)
+
+#5-e
+shapiro.test(reduced_property_model$residuals)
+
+#5-f
+plot(reduced_property_model$fitted.values, rstandard(reduced_property_model),main="Problem 5f\nDiagnostic",sub="Sachi Vyas",xlab="Fitted values",ylab="Residual", pch=23,bg="red",cex=2,lwd=2)
+abline(h=0,col="red")
+abline(h=2,col="blue")
+abline(h=-2,col="blue")
+identify(reduced_property_model$fitted.values,rstandard(reduced_property_model), labels=row.names(CH06PR18))
+
+#6
+newdata<-CH06PR18[abs(rstandard(reduced_property_model))<2 , ]
+model_no_outliers <- lm(rental_rates ~ age + expenses + square_footage, newdata)
+summary(model_no_outliers)$r.squared
+summary(model_no_outliers)$adj.r.squared
+```
+
+```{r}
+#Problem 1B
+X<-matrix(c(rep(1,81),CH06PR18$age,CH06PR18$expenses,CH06PR18$vacancy_rates,CH06PR18$square_footage), ncol=5)
+Y<-matrix(CH06PR18$rental_rates)
+#b-hat
+b<-solve(t(X)%*%X)%*%t(X)%*%Y
+b
+#1
+etre<-(t(Y)%*%Y)-t(b)%*%t(X)%*%Y
+etre
+
+#2
+#SSE
+sse <- (t(Y)%*%Y) - t(b)%*%t(X)%*%Y
+sse
+#MSE
+Mse <- as.vector(sse/(81-5))
+#var b-hat
+var_b_hat <- Mse*solve(t(X)%*%X)
+var_b_hat
+#SSTO
+J<-matrix(rep(1,81*81), ncol=length(Y))
+J_overn<-matrix(rep(1/length(Y), 81*81), ncol=length(Y))
+ytry<-t(Y)%*%Y
+SSTO<-ytry-t(Y)%*%J_overn%*%Y
+SSTO
+#SSR
+H<-X%*%solve(t(X)%*%X)%*%t(X)
+SSR<-t(Y)%*%H%*%Y-t(Y)%*%J_overn%*%Y
+SSR
+
+avg_age <- mean(X[, 2])  # Replace 2 with the column index of the 'age' variable
+avg_expenses <- mean(X[, 3])# Replace 3 with the column index of the 'expenses' variable
+avg_vacancy_rates <- mean(X[, 4])
+avg_square_footage <- mean(X[, 5])
+X_h <- c(1, avg_age, avg_expenses, avg_vacancy_rates, avg_square_footage)
+#X_h2 <- matrix(X_h, ncol = 1)
+#X2 <- X[,2:5]
+E_Yh <- t(X_h) %*% b
+E_Yh
+
+#Sigma-squared y-hat
+s2_y_hat <- Mse%*%t(X_h)%*%solve(t(X)%*%X)%*%X_h
+s2_y_hat
+```

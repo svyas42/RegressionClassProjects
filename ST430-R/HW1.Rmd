@@ -1,0 +1,162 @@
+---
+title: "HW1"
+author: "Sachi Vyas"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+day_seven = c(2300, 3390, 2430, 2890, 3330, 2480, 3380, 2660, 2620, 3340)
+day_twentyEight = c(4070, 5220, 4640, 4620, 4850, 4120, 5020, 4890, 4190, 4630)
+mean(day_seven)
+mean(day_twentyEight)
+var(day_seven)
+var(day_twentyEight)
+cor(day_seven, day_twentyEight)
+```
+
+```{r}
+#plot for 2c
+plot(day_seven, day_twentyEight,
+    sub = "Sachi Vyas",
+     main = "Problem(2c)",
+     xlab = "7-Day Strength",
+     ylab = "28-Day Strength",
+     xlim = c(2000, 3500), 
+     ylim = c(4000, 5500), 
+     axes = TRUE)
+axis(1, at = seq(2000, 3500, by = 250))
+axis(2, at = seq(4000, 5500, by = 250), labels = seq(4000, 5500, by = 250))
+
+#2d
+reg_model <- lm(formula = day_twentyEight ~ day_seven)
+summary(reg_model)
+
+
+#2h
+res <- residuals(reg_model)
+hist(res, col = "gray", sub = "Sachi Vyas", main = "Problem (2h)",freq=FALSE)
+lines(density(res), col = "red", lwd = 2 )
+```
+
+```{r}
+#3
+CH01PR19 <- read.delim("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/gpa.txt", sep = "", header = FALSE, col.names = c("Gpa", "Act"))
+plot(CH01PR19$Act, CH01PR19$Gpa, sub = "Sachi Vyas", main = "Problem (3a)", xlab = "Act score", ylab = "Gpa")
+
+#3b
+lm_model <- lm(CH01PR19$Gpa ~ CH01PR19$Act)
+lm_model
+abline(lm_model, col = "red")
+point_estimate <- coef(lm_model)
+
+#3g
+mean(CH01PR19$Act)
+mean(CH01PR19$Gpa)
+```
+
+```{r}
+#4
+X1 <- "blood clotting score"
+X2 <- "prognostic index"
+X3 <- "enzyme function test score"
+X4 <- "liver function test score"
+X5 <- "age"
+X6 <- "indicator variable for gender (0=male; 1=female)"
+X7 <- "alcohol use history"
+X8 <- "alcohol use history"
+
+surg.data <- read.delim("C:/Users/sachi/OneDrive/Desktop/430 notes/datasets/CH09TA01.txt", sep = "",
+header=FALSE,
+col.names = c("clot", "PI", "enzy", "liver", "age",
+"gender", "mod_use", "heavy_use", "sur_time",
+"ln_sur_time"))
+attach(surg.data)
+gender=factor(gender)
+surg.data1<- surg.data[ ,seq(1,4)] # new data set
+pairs(surg.data1,cex.labels=3, pch=23,bg="orange", cex=2)
+par(mfrow=c(2,2))
+for(i in 1:ncol(surg.data1)){
+hist(surg.data1[,i],main=names(surg.data1)[i],prob=T)
+lines(density(surg.data1[,i], na.rm=TRUE), col="red")
+}
+par(mfrow = c(1, 1))
+boxplot(sur_time ~ gender, surg.data)
+boxplot(clot~ gender, surg.data) # it draws a side-by-side box plot because the variable sex is a qualitative variable
+boxplot(PI~ gender, surg.data)
+boxplot(enzy~ gender, surg.data)
+boxplot(liver~ gender, surg.data)
+par(mfrow=c(2,2))
+plot(clot,sur_time,main="sur_time on clot")
+lines(lowess(sur_time~clot),col="red")
+plot(PI,sur_time,main="sur_time on PI")
+lines(lowess(sur_time~PI),col="blue")
+plot(enzy,sur_time,main="sur_time on enzy")
+lines(lowess(sur_time~enzy),col="green")
+plot(liver,sur_time,main="sur_time on liver")
+lines(lowess(sur_time~liver),col="purple")
+
+summary(lm(sur_time~clot))
+summary(lm(sur_time~PI))
+summary(lm(sur_time~enzy))
+summary(lm(sur_time~liver))
+```
+
+```{r}
+#5
+library(faraway)
+
+#bodyfat-weight
+model1 <-lm(formula = fat$brozek ~ fat$weight)
+summary(model1)
+anova(model1)
+
+#bodyfat-age
+model2 <-lm(formula = fat$brozek ~ fat$age)
+summary(model2)
+anova(model2)
+
+#bodyfat-height
+model3 <-lm(formula = fat$brozek ~ fat$height)
+summary(model3)
+anova(model3)
+
+#bodyfat-adipos
+model4 <-lm(formula = fat$brozek ~ fat$adipos)
+summary(model4)
+anova(model4)
+
+#bodyfat-free
+model5 <-lm(formula = fat$brozek ~ fat$free)
+summary(model5)
+anova(model5)
+
+#bodyfat-neck
+model6 <-lm(formula = fat$brozek ~ fat$neck)
+summary(model6)
+anova(model6)
+
+#bodyfat-chest
+model7 <-lm(formula = fat$brozek ~ fat$chest)
+summary(model7)
+anova(model7)
+
+#bodyfat-abdom
+model8 <-lm(formula = fat$brozek ~ fat$abdom)
+summary(model8)
+anova(model8)
+
+#bodyfat-thigh
+model9 <-lm(formula = fat$brozek ~ fat$thigh)
+summary(model9)
+anova(model9)
+
+#bodyfat-forearm
+model10 <-lm(formula = fat$brozek ~ fat$forearm)
+summary(model10)
+anova(model10)
+```
